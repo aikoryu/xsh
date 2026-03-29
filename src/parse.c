@@ -2,11 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "parse.h"
 
-struct CmdArgs {
-    size_t count;
-    char** args_arr;
-};
 bool experimental_flag_set(int argc, char* argv[]) {
     if (argc < 0) {
         return false;
@@ -17,9 +14,9 @@ bool experimental_flag_set(int argc, char* argv[]) {
     return false;
 }
 
-struct CmdArgs _parse_command_line(char* s_args) {
+CmdArgs _parse_command_line(char* s_args) {
     char** args_arr = NULL;
-    const char* s_delim = " ";
+    const char* s_delim = " \t\r\n\v\f";
     char* tok;
     int count = 0;
 
@@ -27,7 +24,7 @@ struct CmdArgs _parse_command_line(char* s_args) {
 
     while (tok != NULL) {
         char** temp = realloc(args_arr, (count + 2) * sizeof(char*));
-        if (args_arr == NULL) {
+        if (temp == NULL) {
             perror("realloc failed");
             exit(1);
         }
@@ -49,9 +46,19 @@ struct CmdArgs _parse_command_line(char* s_args) {
     if (args_arr != NULL)
         args_arr[count] = NULL;
 
-    return (struct CmdArgs){
+    return (CmdArgs){
         .count = count,
         .args_arr = args_arr
     };
 
+}
+
+void _free_cmd_args(CmdArgs *parsed) {
+    for (size_t i = 0; i < parsed->count; i++) {
+        free(parsed->args_arr[i]);
+    }
+    free(parsed->args_arr);
+
+    parsed->count = 0;
+    parsed->args_arr = NULL;
 }

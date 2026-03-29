@@ -1,15 +1,12 @@
 # TODO
 
-## Review Findings
+## 2026-03-28 (source + test coverage review)
 
-1. `Critical` `src/parse.c:29-31`  
-   `_parse_command_line` checks `args_arr == NULL` after `realloc`, which causes non-empty input to fail and `exit(1)` on the first token.
+1. `Medium` `tests/test_parse.c`
+   Add parser tests for whitespace-only input and mixed whitespace tokenization (`" \t\n"` and `"echo\thello"`), since delimiter handling changed and those cases are currently unverified.
 
-2. `High` `src/shell.c:39`  
-   `execvp` is called as `execvp(line, &line)` instead of using tokenized argv (`parsed.args_arr`), so command execution is incorrect.
+2. `Medium` `src/shell.c`
+   Add shell-loop integration tests for the exec path (`execvp(parsed.args_arr[0], parsed.args_arr)`) and builtin/empty-input continue paths to ensure `_free_cmd_args` is always hit.
 
-3. `Medium` `src/shell.c:24-30`  
-   Parsed argument buffers are never freed in the shell loop (including `continue` paths), causing per-command memory leaks.
-
-4. `Low` `src/parse.c:16`  
-   `experimental_flag_set` prints `Invalid flag, starting default shell` even for normal startup with no flag (`argc == 1`), producing noisy output.
+3. `Low` `src/parse.c:13`
+   Reduce noisy startup output from `experimental_flag_set` so normal startup (`argc == 1`) does not print `Invalid flag, starting default shell`.

@@ -14,20 +14,29 @@ void shell_loop(bool experimental) {
     char* line = NULL;
     size_t n = 0;
 
-    (void) experimental;
-
     while (true) {
+        if (experimental == true) {
+            // TODO: This should include get_status_line and also allow experimental commands like last() to be called
+            printf("\nxsh> ");
+        } else {
+            printf("\nxsh> ");
+        }
+
         ssize_t bytes = getline(&line, &n, stdin);
         if (bytes == -1)
             break;
 
         struct CmdArgs parsed = _parse_command_line(line);
 
-        if (parsed.count == 0)
+        if (parsed.count == 0) {
+            _free_cmd_args(&parsed);
             continue;
+        }
 
-        if (_call_builtins(parsed))
+        if (_call_builtins(parsed)) {
+            _free_cmd_args(&parsed);
             continue;
+        }
 
         pid_t child = fork();
 
@@ -35,11 +44,13 @@ void shell_loop(bool experimental) {
             perror("failed to spawn child");
             exit(1);
         } else if (child == 0) {
-            // TODO: this is going to require writing a tokenizer... so we should actually tokenize the input prior to forking
-            execvp(line, &line);
+            execvp(parsed.args_arr[0], parsed.args_arr);
+            perror("execvp failed");
+            exit(1);
         }
 
         waitpid(child, NULL, 0);
+        _free_cmd_args(&parsed);
     }
 
     free(line);
