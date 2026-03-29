@@ -1,5 +1,8 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <pwd.h>
 #include "parse.h"
 
 bool _call_builtins(struct CmdArgs parsed) {
@@ -7,8 +10,23 @@ bool _call_builtins(struct CmdArgs parsed) {
         return false;
 
     if (strcmp(parsed.args_arr[0], "cd") == 0) {
-        // chdir()
-        return true;
+        if (parsed.count > 2) {
+            perror("Too many arguments: USAGE: cd <path>");
+            return true;
+        } else if (parsed.count < 2) {
+            char* home_dir = getpwuid(getuid()) -> pw_dir;
+            int c = chdir(home_dir);
+            if (c < 0) {
+                perror("Not able to change directory");
+            }
+            return true;
+        } else if (parsed.count == 2) {
+            int c = chdir(parsed.args_arr[1]);
+            if (c < 0) {
+                perror("Not able to change directory");
+            }
+            return true;
+        }
     }
 
     if (strcmp(parsed.args_arr[0], "exit") == 0) {
@@ -16,7 +34,7 @@ bool _call_builtins(struct CmdArgs parsed) {
     }
 
     if (strcmp(parsed.args_arr[0], "export") == 0) {
-        //export
+        // TODO: implement export
         return true;
     }
 

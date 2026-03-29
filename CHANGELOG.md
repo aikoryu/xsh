@@ -1,7 +1,5 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
 - [2026-03-28] - Added header include guards - Added `#ifndef/#define/#endif` guards in `src/parse.h`, `src/shell.h`, and `src/builtins.h` to prevent duplicate-inclusion issues.
 - [2026-03-28] - Fixed `execvp` argv wiring - In `shell_loop` (`src/shell.c`), changed child execution to `execvp(parsed.args_arr[0], parsed.args_arr)` so the process gets a valid program name and NULL-terminated argv.
 - [2026-03-28] - Added child exec error path - In `src/shell.c`, added `perror("execvp failed")` and `exit(1)` after `execvp` to handle execution failures explicitly in the child.
@@ -13,3 +11,7 @@ All notable changes to this project will be documented in this file.
 - [2026-03-28] - Updated parser behavior tests - In `tests/test_parse.c`, replaced the old non-empty-input `exit(1)` expectation with successful parse assertions and cleanup checks.
 - [2026-03-28] - Added newline-tokenization regression test - In `tests/test_parse.c`, added coverage for `"exit\n"` parsing to ensure single-token commands are normalized before builtin/exec paths.
 - [2026-03-28] - Revalidated test targets - Ran `make test` (both `test_parse` and `test_builtins` passed) after parser/shell fixes.
+- [2026-03-29] - Implemented `cd` builtin path change - In `_call_builtins` (`src/builtins.c`), replaced the `cd` placeholder with argument-count checks, `chdir()` invocation, and `perror` handling for failed directory changes.
+- [2026-03-29] - Finalized `cd` argument semantics - In `_call_builtins` (`src/builtins.c`), added explicit too-many-arguments handling and no-argument home-directory behavior via `getpwuid(getuid())->pw_dir` before calling `chdir`.
+- [2026-03-29] - Normalized tracking docs format - Updated `TODO.md` and `CHANGELOG.md` to reflect in-file TODOs and keep changelog entries in the required single-line format without generic scaffolding text.
+- [2026-03-29] - Revalidated tests after `cd` changes - Ran `make test` and confirmed both `build/tests/test_parse` and `build/tests/test_builtins` now pass with the current `_call_builtins` behavior in `src/builtins.c`.
