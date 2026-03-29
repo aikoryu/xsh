@@ -10,7 +10,6 @@ bool experimental_flag_set(int argc, char* argv[]) {
     } else if (argc > 1 && strcmp(argv[1], "--enable-experimental") == 0)
         return true;
 
-    printf("Invalid flag, starting default shell");
     return false;
 }
 

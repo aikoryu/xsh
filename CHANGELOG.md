@@ -13,5 +13,9 @@
 - [2026-03-28] - Revalidated test targets - Ran `make test` (both `test_parse` and `test_builtins` passed) after parser/shell fixes.
 - [2026-03-29] - Implemented `cd` builtin path change - In `_call_builtins` (`src/builtins.c`), replaced the `cd` placeholder with argument-count checks, `chdir()` invocation, and `perror` handling for failed directory changes.
 - [2026-03-29] - Finalized `cd` argument semantics - In `_call_builtins` (`src/builtins.c`), added explicit too-many-arguments handling and no-argument home-directory behavior via `getpwuid(getuid())->pw_dir` before calling `chdir`.
+- [2026-03-29] - Added parser whitespace-tokenization coverage - In `tests/test_parse.c`, added explicit tests for whitespace-only input (`" \t\n"`) and mixed-whitespace tokenization (`"echo\thello"`).
+- [2026-03-29] - Added shell-loop integration path tests - Added `tests/test_shell.c` with mocked dependencies to validate empty-input/builtin `_free_cmd_args` continue paths and the `execvp(parsed.args_arr[0], parsed.args_arr)` execution flow, and wired `test_shell` into `Makefile` `test`.
+- [2026-03-29] - Removed default-startup flag warning output - In `experimental_flag_set` (`src/parse.c`), removed the fallback `printf` so normal startup without flags no longer prints `Invalid flag, starting default shell`.
 - [2026-03-29] - Normalized tracking docs format - Updated `TODO.md` and `CHANGELOG.md` to reflect in-file TODOs and keep changelog entries in the required single-line format without generic scaffolding text.
 - [2026-03-29] - Revalidated tests after `cd` changes - Ran `make test` and confirmed both `build/tests/test_parse` and `build/tests/test_builtins` now pass with the current `_call_builtins` behavior in `src/builtins.c`.
+- [2026-03-29] - Pruned resolved TODO coverage section - Removed the completed `2026-03-28 (source + test coverage review)` section from `TODO.md` after parser whitespace/shell path tests and startup-noise fix were completed.
