@@ -19,3 +19,7 @@
 - [2026-03-29] - Normalized tracking docs format - Updated `TODO.md` and `CHANGELOG.md` to reflect in-file TODOs and keep changelog entries in the required single-line format without generic scaffolding text.
 - [2026-03-29] - Revalidated tests after `cd` changes - Ran `make test` and confirmed both `build/tests/test_parse` and `build/tests/test_builtins` now pass with the current `_call_builtins` behavior in `src/builtins.c`.
 - [2026-03-29] - Pruned resolved TODO coverage section - Removed the completed `2026-03-28 (source + test coverage review)` section from `TODO.md` after parser whitespace/shell path tests and startup-noise fix were completed.
+- [2026-03-30] - Implemented `export` builtin behavior - In `_call_builtins` (`src/builtins.c`), replaced the placeholder with argument validation, `KEY=value` parsing via `_parse_export_args`, `setenv(..., 1)`, and cleanup through `_free_export_args`.
+- [2026-03-30] - Added export parser helpers to parse module - In `src/parse.h` and `src/parse.c`, added `ExportArgs`, `_parse_export_args`, and `_free_export_args` to safely split export input on the first `=` and free allocated name/value buffers.
+- [2026-03-30] - Fixed `test_builtins` linker inputs - Updated `Makefile` so `$(TEST_BUILTINS_BIN)` links `src/parse.c` with `src/builtins.c`, resolving undefined references to `_parse_export_args` and `_free_export_args`.
+- [2026-03-30] - Revalidated tests after export/link updates - Ran `make test` and confirmed `test_parse`, `test_builtins`, and `test_shell` all pass with the current tree.

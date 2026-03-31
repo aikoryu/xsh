@@ -61,3 +61,58 @@ void _free_cmd_args(CmdArgs *parsed) {
     parsed->count = 0;
     parsed->args_arr = NULL;
 }
+
+ExportArgs _parse_export_args(char* s_export) {
+   ExportArgs parsed = {
+       .count = 0,
+       .name = NULL,
+       .value = NULL
+   };
+
+   if (s_export == NULL) {
+       return parsed;
+   }
+
+   char* eq = strchr(s_export, '=');
+   if (eq == NULL) {
+       parsed.name = malloc(strlen(s_export) + 1);
+       if (parsed.name == NULL) {
+           perror("malloc failed");
+           return parsed;
+       }
+
+       strcpy(parsed.name, s_export);
+       parsed.count = 1;
+       return parsed;
+   }
+
+   size_t name_len = (size_t)(eq - s_export);
+   size_t value_len = strlen(eq + 1);
+
+   parsed.name = malloc(name_len + 1);
+   parsed.value = malloc(value_len + 1);
+   if (parsed.name == NULL || parsed.value == NULL) {
+       perror("malloc failed");
+       free(parsed.name);
+       free(parsed.value);
+       parsed.name = NULL;
+       parsed.value = NULL;
+       return parsed;
+   }
+
+   memcpy(parsed.name, s_export, name_len);
+   parsed.name[name_len] = '\0';
+   memcpy(parsed.value, eq + 1, value_len + 1);
+   parsed.count = 2;
+
+   return parsed;
+}
+
+void _free_export_args(ExportArgs *p_export) {
+    free(p_export->name);
+    free(p_export->value);
+
+    p_export->count = 0;
+    p_export->name = NULL;
+    p_export->value=NULL;
+}
