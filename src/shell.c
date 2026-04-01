@@ -10,6 +10,8 @@
 #include "parse.h"
 #include "builtins.h"
 
+// TODO: implement .xsh_history so that the last() command has a last command to target
+
 void shell_loop(bool experimental) {
     char* line = NULL;
     size_t n = 0;
@@ -17,6 +19,9 @@ void shell_loop(bool experimental) {
     while (true) {
         if (experimental == true) {
             // TODO: This should include get_status_line and also allow experimental commands like last() to be called
+            // TODO: scaffolding for last is built out, might ultimately have to split the actual processing of commands here as well for
+            // for example, if last is called in experimental mode it should just run the last command `if (experimental == false)`
+            // last shouldn't be available
             printf("\nxsh> ");
         } else {
             printf("\nxsh> ");
