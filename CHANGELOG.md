@@ -23,3 +23,5 @@
 - [2026-03-30] - Added export parser helpers to parse module - In `src/parse.h` and `src/parse.c`, added `ExportArgs`, `_parse_export_args`, and `_free_export_args` to safely split export input on the first `=` and free allocated name/value buffers.
 - [2026-03-30] - Fixed `test_builtins` linker inputs - Updated `Makefile` so `$(TEST_BUILTINS_BIN)` links `src/parse.c` with `src/builtins.c`, resolving undefined references to `_parse_export_args` and `_free_export_args`.
 - [2026-03-30] - Revalidated tests after export/link updates - Ran `make test` and confirmed `test_parse`, `test_builtins`, and `test_shell` all pass with the current tree.
+- [2026-03-31] - Added history-file helper module - Added `src/file.h` and `src/file.c` with `construct_history_path`, `check_history_exists`, `create_history`, and `append_to_history` helpers to manage the `.xsh_history` file lifecycle under the user home directory.
+- [2026-03-31] - Initialized history file during startup - In `main` (`src/main.c`), included `file.h` and invoked `create_history(check_history_exists())` before `start_shell(...)` so shell startup ensures `.xsh_history` is present.
