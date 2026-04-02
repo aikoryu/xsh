@@ -25,3 +25,5 @@
 - [2026-03-30] - Revalidated tests after export/link updates - Ran `make test` and confirmed `test_parse`, `test_builtins`, and `test_shell` all pass with the current tree.
 - [2026-03-31] - Added history-file helper module - Added `src/file.h` and `src/file.c` with `construct_history_path`, `check_history_exists`, `create_history`, and `append_to_history` helpers to manage the `.xsh_history` file lifecycle under the user home directory.
 - [2026-03-31] - Initialized history file during startup - In `main` (`src/main.c`), included `file.h` and invoked `create_history(check_history_exists())` before `start_shell(...)` so shell startup ensures `.xsh_history` is present.
+- [2026-04-01] - Hardened history path null handling - In `src/file.c`, `construct_history_path` now guards `getpwuid(getuid())` before using `pw_dir`, and history helpers handle `NULL` path results to avoid passwd-lookup crash paths.
+- [2026-04-01] - Made history existence probe permission-independent - In `src/file.c`, `check_history_exists` now uses `access(path, F_OK)` instead of `fopen(..., "r")`, avoiding unreadable-file misclassification that could lead to truncation flow.
