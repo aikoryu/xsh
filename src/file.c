@@ -1,50 +1,51 @@
 #define _GNU_SOURCE
-#include <linux/limits.h>
 #include <pwd.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-// TODO: Fall back to $HOME if getpwuid() fails
 char *construct_history_path() {
   struct passwd *_passwd = getpwuid(getuid());
-  char *home_dir;
-  if (_passwd == NULL) {
-    return NULL;
-  } else {
+  const char *home_dir = NULL;
+
+  if (_passwd != NULL && _passwd->pw_dir != NULL) {
     home_dir = _passwd->pw_dir;
+  } else {
+    home_dir = getenv("HOME");
   }
-  char *xsh_history = ".xsh_history";
-  char *buffer = NULL;
-  int len = asprintf(&buffer, "%s/%s", home_dir, xsh_history);
-  if (len < 0) {
-    perror("failed to check for history");
-    free(buffer);
-    buffer = NULL;
+
+  if (home_dir == NULL || home_dir[0] == '\0') {
+    fprintf(stderr, "Error: Could not get home directory\n");
     return NULL;
   }
+
+  char *buffer = NULL;
+  int len = asprintf(&buffer, "%s/.xsh_history", home_dir);
+  if (len < 0 || buffer == NULL) {
+    perror("failed to construct history path");
+    free(buffer);
+    return NULL;
+  }
+
   return buffer;
 }
 
 bool check_history_exists() {
-  const char *history = construct_history_path();
+  char *history = construct_history_path();
   if (history == NULL) {
-    fprintf(stderr, "Error: Could not get passwd");
+    fprintf(stderr, "Error: Could not determine history path\n");
     return false;
   }
 
-  int check_access;
+  bool exists = access(history, F_OK) == 0;
+  free(history);
 
-  if ((check_access = access(history, F_OK) == 0)) {
-    return true;
-  }
-
-  return false;
+  return exists;
 }
 
-/* We return true if history doesn't exist but is created here, we return false
- * if history already exists and we open the file in append mode*/
+/* Return true when history already exists or is successfully created.
+ * Return false when history path construction or file creation fails. */
 bool create_history(bool history_exists) {
   if (history_exists) {
     return true;
@@ -52,15 +53,17 @@ bool create_history(bool history_exists) {
     FILE *f;
     char *history_file = construct_history_path();
     if (history_file == NULL) {
-      fprintf(stderr, "Error: Could not get passwd");
+      fprintf(stderr, "Error: Could not determine history path\n");
       return false;
     }
 
     if ((f = fopen(history_file, "w")) == NULL) {
-      fprintf(stderr, "Error: Could not create history file");
+      free(history_file);
+      fprintf(stderr, "Error: Could not create history file\n");
       return false;
     }
 
+    free(history_file);
     fclose(f);
   }
 
@@ -71,17 +74,19 @@ bool append_to_history(char *command) {
   FILE *f;
   char *history_file = construct_history_path();
   if (history_file == NULL) {
-    fprintf(stderr, "Error: Could not get passwd");
+    fprintf(stderr, "Error: Could not determine history path\n");
     return false;
   }
 
   if ((f = fopen(history_file, "a")) == NULL) {
-    fprintf(stderr, "Error: Could not open file to append to");
+    free(history_file);
+    fprintf(stderr, "Error: Could not open file to append to\n");
     return false;
   }
 
   fprintf(f, "%s", command);
 
+  free(history_file);
   fclose(f);
 
   return true;

@@ -1,7 +1,12 @@
-#include <stdio.h>
+#ifndef FILE_H
+#define FILE_H
+
 #include <stdbool.h>
+#include <stdio.h>
 
 char* construct_history_path();
 bool check_history_exists();
 bool create_history(bool history_exists);
 bool append_to_history(char* command);
+
+#endif
